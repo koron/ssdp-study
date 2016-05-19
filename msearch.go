@@ -39,7 +39,7 @@ func main() {
 	/*
 		connResp, err := net.ListenUDP("udp4", connReq.LocalAddr().(*net.UDPAddr))
 		if err != nil {
-			log.Fatal("net.ListenUDP() failed: %s", err)
+			log.Fatalf("net.ListenUDP() failed: %s", err)
 		}
 		defer connResp.Close()
 		c = connResp
