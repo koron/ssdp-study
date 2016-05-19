@@ -24,12 +24,22 @@ func response(addr *net.UDPAddr) error {
 	return nil
 }
 
+func doResponse(addr *net.UDPAddr) {
+	err := response(addr)
+	if err != nil {
+		log.Printf("response() failed: %s", err)
+	}
+}
+
 func main() {
-	addr, err := net.ResolveUDPAddr("udp4", addrIP4)
+	addr, err := net.ResolveUDPAddr("udp", addrIP4)
 	if err != nil {
 		log.Fatalf("net.ResolveUDPAddr() failed: %s", err)
 	}
-	l, err := net.ListenMulticastUDP("udp4", nil, addr)
+	l, err := net.ListenMulticastUDP("udp", nil, addr)
+	if err != nil {
+		log.Fatalf("net.ListenMulticastUDP() failed: %s", err)
+	}
 	buf := make([]byte, 1024*1024)
 	l.SetReadBuffer(len(buf))
 	for {
@@ -39,11 +49,6 @@ func main() {
 		}
 		s := string(buf[:n])
 		fmt.Printf("received: %q from %s\n", s, caddr.String())
-		go func(addr *net.UDPAddr) {
-			err := response(addr)
-			if err != nil {
-				log.Printf("response() failed: %s", err)
-			}
-		}(caddr)
+		//go doResponse(caddr)
 	}
 }
