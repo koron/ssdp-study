@@ -22,10 +22,6 @@ func buildMSearch(st string, mx int) string {
 }
 
 func cast(localAddr string) error {
-	raddr, err := net.ResolveUDPAddr("udp", addrIP4)
-	if err != nil {
-		return err
-	}
 	laddr, err := net.ResolveUDPAddr("udp", localAddr)
 	if err != nil {
 		return err
@@ -40,6 +36,10 @@ func cast(localAddr string) error {
 
 	// send
 	msg := buildMSearch(stAll, 1)
+	raddr, err := net.ResolveUDPAddr("udp", addrIP4)
+	if err != nil {
+		return err
+	}
 	if _, err := c.WriteTo([]byte(msg), raddr); err != nil {
 		return err
 	}
