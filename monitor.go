@@ -1,9 +1,12 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net"
+
+	"github.com/koron/ssdp-study/udp"
 )
 
 const (
@@ -31,28 +34,40 @@ func doResponse(addr *net.UDPAddr) {
 	}
 }
 
-func main() {
+func monitor(ifq string) error {
 	addr, err := net.ResolveUDPAddr("udp", addrIP4)
 	if err != nil {
-		log.Fatalf("net.ResolveUDPAddr() failed: %s", err)
+		return err
 	}
-	ini, err := net.InterfaceByIndex(23)
+	ifi, err := udp.Interface(ifq)
 	if err != nil {
-		log.Fatalf("net.InterfaceByIndex() failed: %s", err)
+		return err
 	}
-	l, err := net.ListenMulticastUDP("udp", ini, addr)
+	l, err := net.ListenMulticastUDP("udp", ifi, addr)
 	if err != nil {
-		log.Fatalf("net.ListenMulticastUDP() failed: %s", err)
+		return err
 	}
 	buf := make([]byte, 1024*1024)
 	l.SetReadBuffer(len(buf))
 	for {
 		n, caddr, err := l.ReadFromUDP(buf)
 		if err != nil {
-			log.Fatalf("ReadFromUDP() failed: %s", err)
+			return err
 		}
 		s := string(buf[:n])
 		fmt.Printf("received: %q from %s\n", s, caddr.String())
 		//go doResponse(caddr)
+	}
+}
+
+func main() {
+	flag.Parse()
+	ifq := "127.0.0.1"
+	if flag.NArg() > 0 {
+		ifq = flag.Arg(0)
+	}
+	err := monitor(ifq)
+	if err != nil {
+		log.Fatalf("monitor failed: %s", err)
 	}
 }
