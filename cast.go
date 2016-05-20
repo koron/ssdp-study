@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net"
@@ -20,22 +21,41 @@ func buildMSearch(st string, mx int) string {
 	return fmt.Sprintf("M-SEARCH * HTTP/1.1\r\nHOST: %s\r\nMAN: \"ssdp:discover\"\r\nMX: %d\r\nST: %s\r\n\r\n", addrIP4, mx, st)
 }
 
-func main() {
-	addr, err := net.ResolveUDPAddr("udp", addrIP4)
+func cast(localAddr string) error {
+	raddr, err := net.ResolveUDPAddr("udp", addrIP4)
 	if err != nil {
-		log.Fatalf("net.ResolveUDPAddr() failed: %s", err)
+		return err
+	}
+	laddr, err := net.ResolveUDPAddr("udp", localAddr)
+	if err != nil {
+		return err
 	}
 
-	connReq, err := net.DialUDP("udp", nil, addr)
+	c, err := net.DialUDP("udp", laddr, raddr)
 	if err != nil {
-		log.Fatalf("net.DialUDP() failed: %s", err)
+		return err
 	}
-	sec := 10
-	defer connReq.Close()
+	defer c.Close()
+
+	fmt.Printf("local addr: %s\n", c.LocalAddr().String())
+	fmt.Printf("remote addr: %s\n", c.RemoteAddr().String())
 
 	// send
-	msg := buildMSearch(stAll, sec)
-	if _, err := connReq.Write([]byte(msg)); err != nil {
-		log.Fatalf("send failed: %s", err)
+	msg := buildMSearch(stAll, 1)
+	if _, err := c.Write([]byte(msg)); err != nil {
+		return err
+	}
+	return nil
+}
+
+func main() {
+	flag.Parse()
+	localAddr := "127.0.0.1:0"
+	if flag.NArg() > 0 {
+		localAddr = flag.Arg(0)
+	}
+	err := cast(localAddr)
+	if err != nil {
+		log.Fatalf("cast failed: %s", err)
 	}
 }
