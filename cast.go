@@ -26,9 +26,12 @@ func cast(localAddr string) error {
 	if err != nil {
 		return err
 	}
-	laddr, err := net.ResolveUDPAddr("udp", localAddr)
-	if err != nil {
-		return err
+	var laddr *net.UDPAddr
+	if localAddr != "" {
+		laddr, err = net.ResolveUDPAddr("udp", localAddr)
+		if err != nil {
+			return err
+		}
 	}
 
 	c, err := net.DialUDP("udp", laddr, raddr)
@@ -50,7 +53,7 @@ func cast(localAddr string) error {
 
 func main() {
 	flag.Parse()
-	localAddr := "127.0.0.1:0"
+	var localAddr string
 	if flag.NArg() > 0 {
 		localAddr = flag.Arg(0)
 	}

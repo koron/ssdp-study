@@ -22,28 +22,18 @@ func buildMSearch(st string, mx int) string {
 }
 
 func main() {
-	addr, err := net.ResolveUDPAddr("udp4", addrIP4)
+	addr, err := net.ResolveUDPAddr("udp", addrIP4)
 	if err != nil {
 		log.Fatalf("net.ResolveUDPAddr() failed: %s", err)
 	}
 
-	connReq, err := net.DialUDP("udp4", nil, addr)
+	connReq, err := net.DialUDP("udp", nil, addr)
 	if err != nil {
 		log.Fatalf("net.DialUDP() failed: %s", err)
 	}
 	sec := 10
 	defer connReq.Close()
 	c := connReq
-
-	// listen reponse unicast
-	/*
-		connResp, err := net.ListenUDP("udp4", connReq.LocalAddr().(*net.UDPAddr))
-		if err != nil {
-			log.Fatalf("net.ListenUDP() failed: %s", err)
-		}
-		defer connResp.Close()
-		c = connResp
-	*/
 
 	// send
 	msg := buildMSearch(stRootDevices, sec)
