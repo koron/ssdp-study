@@ -36,7 +36,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("net.ResolveUDPAddr() failed: %s", err)
 	}
-	l, err := net.ListenMulticastUDP("udp", nil, addr)
+	ini, err := net.InterfaceByIndex(23)
+	if err != nil {
+		log.Fatalf("net.InterfaceByIndex() failed: %s", err)
+	}
+	l, err := net.ListenMulticastUDP("udp", ini, addr)
 	if err != nil {
 		log.Fatalf("net.ListenMulticastUDP() failed: %s", err)
 	}
