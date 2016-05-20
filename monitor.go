@@ -34,12 +34,12 @@ func doResponse(addr *net.UDPAddr) {
 	}
 }
 
-func monitor(ifq string) error {
+func monitor(ifquery string) error {
 	addr, err := net.ResolveUDPAddr("udp", addrIP4)
 	if err != nil {
 		return err
 	}
-	ifi, err := udp.Interface(ifq)
+	ifi, err := udp.Interface(ifquery)
 	if err != nil {
 		return err
 	}
@@ -47,6 +47,7 @@ func monitor(ifq string) error {
 	if err != nil {
 		return err
 	}
+	log.Printf("listening multicast UDP for %s on %q (%s)", addr.String(), ifi.Name, ifquery)
 	buf := make([]byte, 1024*1024)
 	l.SetReadBuffer(len(buf))
 	for {
@@ -55,7 +56,7 @@ func monitor(ifq string) error {
 			return err
 		}
 		s := string(buf[:n])
-		fmt.Printf("received: %q from %s\n", s, caddr.String())
+		log.Printf("received from %s %q", caddr.String(), s)
 		//go doResponse(caddr)
 	}
 }
