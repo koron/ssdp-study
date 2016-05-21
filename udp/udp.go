@@ -57,3 +57,18 @@ func contains(ifi *net.Interface, ip net.IP) bool {
 	}
 	return false
 }
+
+// HasRealAddress checks net.Interface having real IP address or not.
+func HasRealAddress(ifi *net.Interface) bool {
+	addrs, err := ifi.Addrs()
+	if err != nil {
+		return false
+	}
+	for _, a := range addrs {
+		ip := net.ParseIP(a.String())
+		if !ip.IsUnspecified() {
+			return true
+		}
+	}
+	return false
+}
